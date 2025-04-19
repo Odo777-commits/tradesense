@@ -4,39 +4,43 @@ const cors = require('cors');
 const { Pool } = require('pg');
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to PostgreSQL using DATABASE_URL
+// PostgreSQL connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Needed for Railway & other cloud providers
-  },
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
-// Test route
+// Root test route
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
-    res.send(`Connected to PostgreSQL: ${result.rows[0].now}`);
+    res.send(`✅ Connected to PostgreSQL: ${result.rows[0].now}`);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Error connecting to DB:', err);
     res.status(500).send('Database connection failed');
   }
 });
 
-// Example route to get daily tips (from a "tips" table)
+// Example: Fetch latest tip from "tips" table
 app.get('/tips', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tips ORDER BY created_at DESC LIMIT 1');
+    const result = await pool.query(
+      'SELECT * FROM tips ORDER BY created_at DESC LIMIT 1'
+    );
     res.json(result.rows[0]);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Failed to fetch tip:', err);
     res.status(500).send('Failed to fetch tip');
   }
 });
 
-// Start server
+// Server startup
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
