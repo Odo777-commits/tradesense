@@ -1,22 +1,42 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
-const pool = require('./db/pool');
+const { Pool } = require('pg');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Example route to get daily tips
-app.get('/daily_tips', async (req, res) => {
+// Connect to PostgreSQL using DATABASE_URL
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // Needed for Railway & other cloud providers
+  },
+});
+
+// Test route
+app.get('/', async (req, res) => {
   try {
-    const tips = await pool.query('SELECT * FROM daily_tips');
-    res.json(tips.rows);
+    const result = await pool.query('SELECT NOW()');
+    res.send(`Connected to PostgreSQL: ${result.rows[0].now}`);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error(err);
+    res.status(500).send('Database connection failed');
   }
 });
 
+// Example route to get daily tips (from a "tips" table)
+app.get('/tips', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM tips ORDER BY created_at DESC LIMIT 1');
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Failed to fetch tip');
+  }
+});
+
+// Start server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
