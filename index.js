@@ -31,5 +31,5 @@ app.get('/api/tips', async (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${5001}`);
+  console.log(`Server running on port ${PORT}`);
 });
