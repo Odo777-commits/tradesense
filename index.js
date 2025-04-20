@@ -1,34 +1,20 @@
+// index.js
 const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
+const pool = require('./db/pool'); // adjust path if needed
+require('dotenv').config();
+
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 3000;
 
-// PostgreSQL connection config (edit as needed)
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:XsJAefaToZFuYnZczYtweYbhcDypDMkt@mainline.proxy.rlwy.net:29598/railway',
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
-app.use(cors());
-app.use(express.json());
-
-app.get('/api/tips', async (req, res) => {
+app.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT content FROM tips ORDER BY RANDOM() LIMIT 1');
-    if (result.rows.length > 0) {
-      res.json({ content: result.rows[0].content });
-    } else {
-      res.status(404).json({ error: 'No tips found' });
-    }
+    const result = await pool.query('SELECT * FROM tips LIMIT 1'); // Make sure 'tips' table exists
+    res.json(result.rows[0]);
   } catch (err) {
-    console.error('Error querying DB:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('DB error:', err);
+    res.status(500).send('Server error');
   }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

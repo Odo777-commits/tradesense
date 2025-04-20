@@ -1,14 +1,13 @@
+// db/pool.js
 const { Pool } = require('pg');
-const dotenv = require('dotenv');
-
-dotenv.config();
+require('dotenv').config();
 
 const pool = new Pool({
-    user: process.env.DB_USER || 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    database: process.env.DB_NAME || 'railway',
-    password: process.env.DB_PASSWORD || 'Javad111',
-    port: process.env.DB_PORT || 5432,
+  user: process.env.PGUSER,
+  host: process.env.PGHOST, // or postgres.railway.internal if internal access
+  database: process.env.PGDATABASE,
+  password: process.env.PGPASSWORD,
+  port: process.env.PGPORT,
 });
 
 module.exports = pool;
