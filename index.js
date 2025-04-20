@@ -1,43 +1,34 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-
 const app = express();
+const PORT = process.env.PORT || 5001;
+
+// PostgreSQL connection config (edit as needed)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:XsJAefaToZFuYnZczYtweYbhcDypDMkt@mainline.proxy.rlwy.net:29598/railway',
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
 app.use(cors());
 app.use(express.json());
 
-// Connect to PostgreSQL using DATABASE_URL
-const pool = new Pool({
-  connectionString: 'postgresql://postgres:XsJAefaToZFuYnZczYtweYbhcDypDMkt@mainline.proxy.rlwy.net:29598/railway',
-  ssl: {
-    rejectUnauthorized: false, // Needed for SSL connection to Railway
-  },
-});
-
-
-// Test route
-app.get('/', async (req, res) => {
+app.get('/api/tips', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
-    res.send(`Connected to PostgreSQL: ${result.rows[0].now}`);
+    const result = await pool.query('SELECT content FROM tips ORDER BY RANDOM() LIMIT 1');
+    if (result.rows.length > 0) {
+      res.json({ content: result.rows[0].content });
+    } else {
+      res.status(404).json({ error: 'No tips found' });
+    }
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Database connection failed');
+    console.error('Error querying DB:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Example route to get daily tips (from a "tips" table)
-app.get('/tips', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM tips ORDER BY created_at DESC LIMIT 1');
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Failed to fetch tip');
-  }
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// Start server
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
