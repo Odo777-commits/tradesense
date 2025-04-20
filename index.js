@@ -1,21 +1,42 @@
-// index.js
 const express = require('express');
-const pool = require('./db/pool'); // adjust path if needed
+const cors = require('cors');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', async (req, res) => {
+// PostgreSQL connection pool
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'railway',
+  password: process.env.DB_PASSWORD || 'password',
+  port: process.env.DB_PORT || 5432,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Health check
+app.get('/health', (req, res) => {
+  res.send('Server is healthy 🚀');
+});
+
+// Example route to test DB
+app.get('/test-db', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tips LIMIT 1'); // Make sure 'tips' table exists
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error('DB error:', err);
-    res.status(500).send('Server error');
+    const result = await pool.query('SELECT NOW()');
+    res.json({ db_time: result.rows[0] });
+  } catch (error) {
+    console.error('DB Test Error:', error);
+    res.status(500).json({ error: 'Database connection failed' });
   }
 });
 
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
