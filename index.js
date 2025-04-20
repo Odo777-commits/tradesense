@@ -1,8 +1,7 @@
 const express = require('express');
 const app = express();
-const pool = require('./db/pool'); // adjust if your path differs
+const pool = require('./db/pool'); // Adjust path if needed
 
-// Test route to check DB connection
 app.get('/test-db', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
