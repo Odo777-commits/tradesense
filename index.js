@@ -1,7 +1,8 @@
 const express = require('express');
 const app = express();
-const pool = require('./db/pool'); // Make sure path is correct
+const pool = require('./db/pool'); // adjust if your path differs
 
+// Test route to check DB connection
 app.get('/test-db', async (req, res) => {
   try {
     const result = await pool.query('SELECT NOW()');
@@ -12,6 +13,7 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('🚀 Server is running on http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
