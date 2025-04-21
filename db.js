@@ -1,15 +1,19 @@
-// db.js
-require('dotenv').config();  // Load environment variables from .env file
-const { Pool } = require('pg');
+const { Client } = require('pg');  // You need to import the Client from pg
+require('dotenv').config();  // Ensure this is loaded
 
-// Create a new pool with PostgreSQL credentials from .env
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,  // Use this for SSL connections in production
+  },
 });
 
-// Export the pool so it can be used in other parts of the app
-module.exports = pool;
+client.connect()
+  .then(() => {
+    console.log("Connected to the database");
+  })
+  .catch((err) => {
+    console.error('Database connection error:', err.stack);
+  });
+
+module.exports = client;
