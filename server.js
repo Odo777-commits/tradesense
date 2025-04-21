@@ -1,46 +1,46 @@
-require('dotenv').config();
+// server.js
+
 const express = require('express');
-const { Pool } = require('pg');
 const cors = require('cors');
+const { Pool } = require('pg');
+require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// PostgreSQL setup
+// Connect to PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, // Needed for Railway public access
-  },
-});
-
-// Test route to check DB connection
-app.get('/test-db', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW()');
-    res.send(`Database connected: ${result.rows[0].now}`);
-  } catch (err) {
-    console.error('Database connection error:', err);
-    res.status(500).send('Failed to connect to the database.');
+    rejectUnauthorized: false, // Required for Railway SSL
   }
 });
 
-// Route to get all tips
+// Test DB endpoint
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ time: result.rows[0].now });
+  } catch (err) {
+    console.error('DB error:', err);
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
+
+// Tips endpoint
 app.get('/tips', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tips');
+    const result = await pool.query('SELECT * FROM tips ORDER BY created_at DESC');
     res.json(result.rows);
   } catch (err) {
-    console.error('Error fetching tips:', err);
+    console.error('Tips error:', err);
     res.status(500).json({ error: 'Failed to fetch tips' });
   }
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
