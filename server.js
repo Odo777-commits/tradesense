@@ -1,21 +1,40 @@
+// server.js
+
+// Required dependencies
 const express = require('express');
-const client = require('./db'); // Assuming db.js is managing the database connection
+const { Client } = require('pg');
+require('dotenv').config(); // Load environment variables from .env file
+
+// Initialize the app
 const app = express();
+const port = process.env.PORT || 3000;
 
-// Your existing routes here...
-
-// Route to get data from the 'tips' table in the 'railway' database
-app.get('/tips', async (req, res) => {
-  try {
-    // Query to fetch data from the 'tips' table
-    const result = await client.query('SELECT * FROM tips');
-
-    // Send back the rows from the 'tips' table as JSON
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching tips:', err);
-    res.status(500).send('Server error');
-  }
+// Database connection
+const client = new Client({
+  connectionString: process.env.DATABASE_URL, // Use the DATABASE_URL from .env file
 });
 
-// Your existing server listen code here...
+client.connect()
+  .then(() => {
+    console.log('Connected to the database');
+  })
+  .catch(err => {
+    console.error('Database connection error:', err.stack);
+  });
+
+// Define a route to test the database connection
+app.get('/test-db', (req, res) => {
+  // Query the "tips" table
+  client.query('SELECT * FROM tips;', (err, result) => {
+    if (err) {
+      console.error('Error executing query:', err.stack);
+      return res.status(500).send('Error querying the database');
+    }
+    res.json(result.rows); // Send the result from the "tips" table as JSON
+  });
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
