@@ -1,36 +1,33 @@
 // server.js
 
-// Required dependencies
 const express = require('express');
 const { Client } = require('pg');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config(); // Make sure to load environment variables
 
-// Initialize the app
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Database connection
+// Create a PostgreSQL client instance
 const client = new Client({
-  connectionString: process.env.DATABASE_URL, // Use the DATABASE_URL from .env file
+  connectionString: process.env.DATABASE_URL,
 });
 
 client.connect()
   .then(() => {
-    console.log('Connected to the database');
+    console.log('Successfully connected to PostgreSQL');
   })
-  .catch(err => {
+  .catch((err) => {
     console.error('Database connection error:', err.stack);
   });
 
-// Define a route to test the database connection
+// Test database connection route
 app.get('/test-db', (req, res) => {
-  // Query the "tips" table
   client.query('SELECT * FROM tips;', (err, result) => {
     if (err) {
       console.error('Error executing query:', err.stack);
       return res.status(500).send('Error querying the database');
     }
-    res.json(result.rows); // Send the result from the "tips" table as JSON
+    res.json(result.rows); // Return rows from the "tips" table
   });
 });
 
