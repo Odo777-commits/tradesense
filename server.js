@@ -1,35 +1,31 @@
 const express = require('express');
 const { Client } = require('pg');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Create a PostgreSQL client instance
+// Database client setup using connection string from environment
 const client = new Client({
-  connectionString: process.env.DATABASE_URL, // Connection string from .env
+  connectionString: process.env.DATABASE_URL,
 });
 
+// Connect to the PostgreSQL database
 client.connect()
-  .then(() => {
-    console.log('Successfully connected to PostgreSQL');
-  })
-  .catch((err) => {
-    console.error('Database connection error:', err.stack);
-  });
+  .then(() => console.log('Database connected successfully'))
+  .catch(err => console.log('Database connection error', err));
 
-// Test database connection route
-app.get('/test-db', (req, res) => {
-  client.query('SELECT * FROM tips;', (err, result) => {
-    if (err) {
-      console.error('Error executing query:', err.stack);
-      return res.status(500).send('Error querying the database');
-    }
-    res.json(result.rows); // Return rows from the "tips" table
-  });
+// Simple endpoint to test DB connection
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await client.query('SELECT NOW()'); // Simple query to test connection
+    res.json({ status: 'success', time: result.rows[0].now });
+  } catch (err) {
+    console.log('Error executing query', err);
+    res.status(500).json({ status: 'error', message: 'Database query failed' });
+  }
 });
 
-// Start the server
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 });
