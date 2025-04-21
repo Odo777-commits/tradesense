@@ -1,15 +1,13 @@
-// server.js
-
 const express = require('express');
 const { Client } = require('pg');
-require('dotenv').config(); // Make sure to load environment variables
+require('dotenv').config(); // Load environment variables
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Create a PostgreSQL client instance
 const client = new Client({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: process.env.DATABASE_URL, // Connection string from .env
 });
 
 client.connect()
