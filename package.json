@@ -1,19 +1,14 @@
 {
-  "name": "trade-sense-backend",
+  "name": "your-project-name",
   "version": "1.0.0",
-  "description": "Backend for Trade Sense App",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
+  "engines": {
+    "node": "18.x"
   },
   "dependencies": {
     "express": "^4.17.1",
-    "mongoose": "^6.0.12"
+    "mongoose": "^5.10.9"
   },
-  "engines": {
-    "node": "16.x"
-  },
-  "devDependencies": {},
-  "author": "Your Name",
-  "license": "ISC"
+  "scripts": {
+    "start": "node index.js"
+  }
 }
