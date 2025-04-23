@@ -25,13 +25,14 @@ app.use(express.json());
 
 // Tips route
 app.get('/api/tips', async (req, res) => {
-  try {
-    const tips = await Tip.find();
-    res.status(200).json(tips);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch tips' });
-  }
-});
+    try {
+      const tips = await Tip.find().limit(10); // Limit to 10 tips
+      res.status(200).json(tips);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch tips' });
+    }
+  });
+  
 
 // Export serverless handler
 module.exports = app;
