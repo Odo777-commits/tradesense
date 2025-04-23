@@ -1,8 +1,13 @@
 {
-    "functions": {
-      "api/tips.js": {
-        "maxDuration": 30
+    "version": 2,
+    "builds": [
+      {
+        "src": "index.js",
+        "use": "@vercel/node"
       }
+    ],
+    "env": {
+      "MONGO_URI": "mongodb+srv://<your_username>:<your_password>@cluster0.mqvrqsz.mongodb.net/trade_sense?retryWrites=true&w=majority&appName=Cluster0"
     }
   }
   
